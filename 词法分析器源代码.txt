@@ -1,0 +1,308 @@
+
+
+#pragma warning(disable:4996)
+#include <iostream>
+#include<string.h>
+#include<stdio.h>
+
+using namespace std;
+
+const int Max = 37;
+char *KeyWord[Max] = { "short", "int", "long", "char", "float", "double", "if", "else", "while", "for",
+"do", "continue", "break", "return", "void", "break", "const", "switch", "case","sizeof", 
+"signed", "unsigned", "static", "struct", "typedef", "union", "extern","enum", "auto", "default" };
+
+char Delimiter[Max] = { '{', '}', ',', ';', '(', ')', '[', ']', '"' };
+
+char sy[Max] = { '+',' - ','*',' / ', '%' };
+
+char test[1000], token[10], ch;
+int pos = 0, type;
+
+//判断字母
+bool IsLetter(char c)
+{
+	if ((c >= 'a'&&c <= 'z') || (c >= 'A'&&c <= 'Z'))
+		return true;
+	else
+		return false;
+}
+
+//判断数字
+bool IsNumber(char c)
+{
+	if (c >= '0'&&c <= '9')
+		return true;
+	else
+		return false;
+}
+
+//判断界定符
+bool IsDelimiter(char c)
+{
+	char *ptr = strchr(Delimiter, c);
+	if (ptr)
+		return true;
+	else
+		return false;
+}
+
+//判断运算符
+bool IsSy(char c)
+{
+	char *ptr = strchr(sy, c);
+	if (ptr)
+		return true;
+	else
+		return false;
+}
+
+int IsKey(char *token)
+{
+	int i;
+	for (i = 0; i < 30; i++)
+	{
+		if (strcmp(token, KeyWord[i]) == 0)
+		{
+			return i + 1;
+		}
+	}
+	if (i == 30)
+	{
+		return 0;
+	}
+}
+
+//清空字符数组
+void Clear()
+{
+	for (int i = 0; i < 10; i++)
+	{
+		token[i] = '\0';
+	}
+}
+
+//判断类型
+void GetType()
+{
+	Clear();
+	int n = 0;
+	ch = test[pos++];
+	while (ch == ' ' || ch == 9 || ch == 10 || ch == 13)
+	{
+		ch = test[pos++];
+	}
+	//可能是标识符或者变量名
+	if (IsLetter(ch))
+	{
+		n = 0;
+		token[n++] = ch;
+		ch = test[pos++];
+		while (IsLetter(ch) || IsNumber(ch))
+		{
+			token[n++] = ch;
+			ch = test[pos++];
+		}
+		pos--;
+		if (strlen(token) != 0)
+		{
+			type = IsKey(token);
+			if (type != 0)
+			{
+				printf("%s---------%d\n", token, type);
+			}
+			else
+			{
+				//是标识符
+				type = 31;
+				printf("%s---------%d\n", token, type);
+			}
+		}
+	}
+
+	//判断常数
+	else if (IsNumber(ch))
+	{
+		n = 0;
+		while (IsNumber(ch))
+		{
+			token[n++] = ch;
+			ch = test[pos++];
+		}
+		pos--;
+		type = 58;
+		printf("%s---------%d\n", token, type);
+	}
+
+	//判断界符
+	else if (IsDelimiter(ch))
+	{
+		n = 0;
+		char *ptr = strchr(Delimiter, ch);
+		token[n++] = ch;
+		if (ptr)
+		{
+			type = (ptr - Delimiter);
+			printf("%s---------%d\n", token, type);
+		}
+		else
+		{
+			type = -1;
+			printf("%s---------%d,  ERROE!\n", token, type);
+		}
+	}
+
+	//判断运算符
+	else
+	{
+		switch (ch)
+		{
+		case '>':token[n++] = ch;ch = test[pos++];
+			if (ch == '=')
+			{
+				type = 42;
+				token[n++] = ch;
+			}
+			else
+			{
+				type = 41;
+				pos--;
+			}
+			break;
+		case '<':token[n++] = ch; ch = test[pos++];
+			if (ch == '=')
+			{
+				type = 44;
+				token[n++] = ch;
+			}
+			else
+			{
+				type = 43;
+				pos--;
+			}
+			break;
+		case '!':token[n++] = ch; ch = test[pos++];
+			if (ch == '=')
+			{
+				type = 46;
+				token[n++] = ch;
+			}
+			else
+			{
+				type = 45;
+				pos--;
+			}
+			break;
+		case '=':token[n++] = ch; ch = test[pos++];
+			if (ch == '=')
+			{
+				type = 48;
+				token[n++] = ch;
+			}
+			else
+			{
+				type = 47;
+				pos--;
+			}
+			break;
+		case '&':token[n++] = ch; ch = test[pos++];
+			if (ch == '&')
+			{
+				type = 55;
+				token[n++] = ch;
+			}
+			else
+			{
+				type = 54;
+				pos--;
+			}
+			break;
+		case '|':token[n++] = ch; ch = test[pos++];
+			if (ch == '|')
+			{
+				type = 57;
+				token[n++] = ch;
+			}
+			else
+			{
+				type = 56;
+				pos--;
+			}
+			break;
+		case '+':type = 49; token[n++] = ch; break;
+		case '-':type = 50; token[n++] = ch; break;
+		case '*':type = 51; token[n++] = ch; break;
+		case '/':type = 52; token[n++] = ch; break;
+		case '%':type = 53; token[n++] = ch; break;
+		case '#':type = 59; token[n++] = ch; break;
+		default:type = 0; break;
+		}
+
+		if (type == 0)
+		{
+			printf("%s---------%d,  ERROE!\n", token, type);
+		}
+		else
+		{
+			printf("%s---------%d\n", token, type);
+		}
+	}
+
+}
+
+int main()
+{
+	char Ch;
+	int p = 0;
+	char FileName[30];
+	FILE *fp;
+	printf("请输入文件名:");
+	scanf("%s", FileName);
+	if ((fp = fopen(FileName, "r")) != NULL)
+	{
+		while ((Ch = fgetc(fp))!= EOF)
+		{
+			if (Ch == '/'&&(fgetc(fp) == '*'))
+			{
+				Ch = fgetc(fp);
+				while (!(Ch == '*'&&fgetc(fp) == '/'))
+				{
+					Ch = fgetc(fp);
+				}
+
+			}
+			else if(Ch == ' ' || Ch == 9 || Ch == 10 || Ch == 13)
+			{
+				Ch = fgetc(fp);
+				while (Ch != ' '&& Ch != 9 && Ch != 10 && Ch != 13)
+				{
+			          test[p++] = ' ';
+					  break;
+				}
+				fseek(fp, -1, SEEK_CUR);
+			}
+			else
+			{
+			     test[p++] = Ch;
+			}
+		}
+	}
+	else
+	{
+		puts("打开文件错误！");
+		return 0;
+	}
+	test[p] = EOF;
+	int len = strlen(test);
+	puts(test);
+
+	pos = 0;
+	do
+	{
+		GetType();
+	} while (ch!=EOF);
+
+	return 0;
+}
+
+
